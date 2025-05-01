@@ -60,7 +60,7 @@ public class AdditionalMaps : FullSettingsMod<AmSaveSettings, AmGlobalSettings>
         LangStrings = new Consts.LanguageStrings();
         SpriteDict = new TextureStrings();
 
-        On.PlayMakerFSM.Start += OnPlayMakerFSMStart;
+        InitCallbacks();
 
         GameMapHooks.Init(GameMapCallback);
     }
@@ -79,8 +79,6 @@ public class AdditionalMaps : FullSettingsMod<AmSaveSettings, AmGlobalSettings>
         _setCompassPointPrefab = preloadedObjects["Town"]["_Props/Stag_station/open/door_station"]
             .LocateMyFSM("Set Compass Point");
         _setCompassPointRoomPrefab = preloadedObjects["Room_mapper"]["_SceneManager"].LocateMyFSM("map_isroom");
-
-        InitCallbacks();
 
         DefaultSpriteMaterial = new Material(Shader.Find("Sprites/Default"));
         DefaultSpriteMaterial.SetColor(Shader.PropertyToID("_Color"), new Color(1.0f, 1.0f, 1.0f, 1.0f));
@@ -161,14 +159,13 @@ public class AdditionalMaps : FullSettingsMod<AmSaveSettings, AmGlobalSettings>
             var sr = sceneGo.GetComponent<SpriteRenderer>();
             sr.material = roomMat;
             sr.sprite = SpriteDict.Get(sceneGo.name);
+            Log($"Sprite for GO {sceneGo.name} is {sr.sprite != null}");
             sr.sortingLayerID = 629535577;
             sr.sortingOrder = 0;
             var rmr = sceneGo.GetComponent<RoughMapRoom>();
             rmr.fullSprite = sr.sprite;
+            rmr.fullSpriteDisplayed = false;
         }
-
-        // Initialize map with the atrium always showing
-        wpScenes.Find(s => s.name is TextureStrings.Wp03Key)?.SetActive(true);
 
         var tmpChildZ = gameMapBetter.areaCliffs.transform.GetChild(6).localPosition.z;
         const float sceneDivider = 500.0f + (100.0f / 3.0f);
@@ -334,6 +331,9 @@ public class AdditionalMaps : FullSettingsMod<AmSaveSettings, AmGlobalSettings>
             }
         );
 
+        // Initialize map with the atrium always showing
+        wpScenes.Find(s => s.name is TextureStrings.Wp03Key)?.SetActive(true);
+
         #endregion
 
         #region Godhome Map
@@ -366,14 +366,13 @@ public class AdditionalMaps : FullSettingsMod<AmSaveSettings, AmGlobalSettings>
             var sr = sceneGo.GetComponent<SpriteRenderer>();
             sr.material = roomMat;
             sr.sprite = SpriteDict.Get(sceneGo.name);
+            Log($"Sprite for GO {sceneGo.name} is {sr.sprite != null}");
             sr.sortingLayerID = 629535577;
             sr.sortingOrder = 0;
             var rmr = sceneGo.GetComponent<RoughMapRoom>();
             rmr.fullSprite = sr.sprite;
+            rmr.fullSpriteDisplayed = false;
         }
-
-        // Initialize map with the atrium always showing
-        ghScenes.Find(s => s.name is TextureStrings.GhAKey)?.SetActive(true);
 
         ghScenes[0].transform.localPosition = new Vector3(0.3687f, -2.678f, tmpChildZ);
         ghScenes[1].transform.localPosition = new Vector3(-0.708f, 0.65f, tmpChildZ);
@@ -449,6 +448,9 @@ public class AdditionalMaps : FullSettingsMod<AmSaveSettings, AmGlobalSettings>
             }
         );
 
+        // Initialize map with the atrium always showing
+        ghScenes.Find(s => s.name is TextureStrings.GhAKey)?.SetActive(true);
+
         #endregion
 
         //UObject.Destroy(subAreaPrefab);
@@ -458,6 +460,7 @@ public class AdditionalMaps : FullSettingsMod<AmSaveSettings, AmGlobalSettings>
 
     private void InitCallbacks()
     {
+        On.PlayMakerFSM.Start += OnPlayMakerFSMStart;
         // Hooks
         On.GameManager.StartNewGame += OnStartNewGame;
         On.GameManager.ContinueGame += OnContinueGame;
@@ -933,7 +936,7 @@ public class AdditionalMaps : FullSettingsMod<AmSaveSettings, AmGlobalSettings>
 
     private static void ChangeGhMap(GameObject worldMap, GameObject wideMap)
     {
-        DebugLog($"!ChangeWpMap: \"{wideMap}\"");
+        DebugLog($"!ChangeGhMap: \"{wideMap}\"");
 
         var cameraZoomPosition = new Vector3(-8.07f, -16f, -22f);
         var mapAreaPosition = new Vector3(4.75f, -2.25f, -2.3f);
@@ -1063,7 +1066,7 @@ public class AdditionalMaps : FullSettingsMod<AmSaveSettings, AmGlobalSettings>
 
         wideMap.SetActive(tmpActive);
 
-        DebugLog("~ChangeWpMap");
+        DebugLog("~ChangeGhMap");
     }
 
     #endregion
